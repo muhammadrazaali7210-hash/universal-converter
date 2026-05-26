@@ -66,7 +66,7 @@
         }
 
         .upload-zone {
-            display: block; /* Required for Label Bypass */
+            display: block;
             border: 2px dashed var(--accent-blue);
             border-radius: 8px;
             padding: 30px 20px;
@@ -262,7 +262,6 @@
             if (statusText) progressStatus.innerText = statusText;
         }
 
-        // BINDING NATIVE FILE INPUT LISTENER
         document.getElementById('file-input').addEventListener('change', function(e) {
             if (e.target.files && e.target.files.length > 0) {
                 assetBatchQueue = Array.from(e.target.files).slice(0, 200);
@@ -504,27 +503,21 @@
             ffmpeg.FS('unlink', outName);
         }
 
-        // ULTRA-COMPATIBLE DOWNLOAD BRIDGE FOR NATIVE ANDROID SYSTEM INTERCEPT
+        // SYSTEM FILE TRANSLATION DISPATCH MATRIX
         function triggerDownload(blob, filename) {
             const reader = new FileReader();
             reader.onloadend = function() {
                 const base64Data = reader.result;
                 
-                // Force octet-stream mime logic to trigger standard Android save behavior
+                // Force octet-stream MIME logic to trigger safe Android WebView save recognition
                 const downloadUrl = base64Data.replace(/^data:[^;]+;/, 'data:application/octet-stream;');
                 
-                // Construct a detached iframe channel to bypass link restriction rules
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = downloadUrl;
-                document.body.appendChild(iframe);
-                
-                // Fallback direct execution loop if iframe layer is restricted
-                setTimeout(() => {
-                    if (iframe.parentNode) {
-                        document.body.removeChild(iframe);
-                    }
-                }, 5000);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             };
             reader.readAsDataURL(blob);
         }
