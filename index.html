@@ -481,7 +481,7 @@
             const isAudioOutput = ['mp3', 'wav', 'm4a'].includes(targetFormat);
             const isVideoOutput = ['mp4', 'mkv'].includes(targetFormat);
 
-                        if (isAudioInput && isVideoOutput) {
+                                    if (isAudioInput && isVideoOutput) {
                 await ffmpeg.run('-f', 'lavfi', '-i', 'color=c=black:s=640x480:r=30', '-i', inName, '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac', '-b:a', '128k', '-pix_fmt', 'yuv420p', '-shortest', outName);
             } else if (isAudioOutput) {
                 await ffmpeg.run('-i', inName, '-vn', outName);
@@ -508,8 +508,6 @@
             const reader = new FileReader();
             reader.onloadend = function() {
                 const base64Data = reader.result;
-                
-                // Force octet-stream MIME logic to trigger safe Android WebView save recognition
                 const downloadUrl = base64Data.replace(/^data:[^;]+;/, 'data:application/octet-stream;');
                 
                 const a = document.createElement('a');
