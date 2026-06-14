@@ -3,528 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS Local Processing Core</title>
-    
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-
+    <title>AliRaza Converter</title>
+    <!-- Links the app identity description matrix for Android installation -->
+    <link rel="manifest" href="manifest.json">
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --panel-dark: #1e293b;
-            --accent-cyan: #22d3ee;
-            --accent-blue: #3b82f6;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --success: #10b981;
-            --error: #ef4444;
-        }
-
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+            background-color: #0f172a;
+            color: #f8fafc;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
             min-height: 100vh;
+            padding: 20px;
         }
 
-        .header-title {
-            color: var(--accent-cyan);
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+        .container {
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
             text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
-        .header-sub {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-            text-align: center;
+        h1 {
+            color: #22d3ee;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
         }
 
-        .engine-container {
-            background: var(--panel-dark);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+        .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .file-box {
+            border: 2px dashed #475569;
             border-radius: 12px;
-            padding: 25px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .upload-zone {
-            display: block;
-            border: 2px dashed var(--accent-blue);
-            border-radius: 8px;
-            padding: 30px 20px;
-            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
             cursor: pointer;
-            background: rgba(59, 130, 246, 0.05);
-            transition: 0.3s;
-            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.3s;
         }
 
-        .upload-zone:hover {
-            border-color: var(--accent-cyan);
-            background: rgba(34, 211, 238, 0.1);
+        .file-box:hover {
+            border-color: #38bdf8;
         }
 
-        #file-input { display: none; }
-
-        .file-info {
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
-            border-left: 3px solid var(--accent-cyan);
-            font-size: 0.85rem;
-            display: none;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .selector-group { margin-top: 20px; }
-        
-        .selector-group label {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-dark);
-            color: var(--text-light);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            outline: none;
-            font-size: 1rem;
-        }
-
-        .progress-container {
-            margin-top: 20px;
+        input[type="file"] {
             display: none;
         }
 
-        .progress-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-
-        .progress-track {
+        .btn {
             width: 100%;
-            height: 8px;
-            background: var(--bg-dark);
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-            transition: width 0.1s ease;
-        }
-
-        .btn-execute {
-            width: 100%;
-            margin-top: 20px;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: white;
+            padding: 15px;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
-            transition: 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-bottom: 15px;
         }
 
-        .btn-execute:active { transform: scale(0.98); }
+        .btn-select {
+            background-color: #38bdf8;
+            color: #0f172a;
+        }
 
-        .terminal-log {
+        .btn-select:hover { background-color: #7dd3fc; }
+
+        .btn-convert {
+            background-color: #22c55e;
+            color: #ffffff;
+        }
+
+        .btn-convert:hover { background-color: #4ade80; }
+        .btn-convert:disabled {
+            background-color: #475569;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .status {
+            color: #cbd5e1;
+            font-size: 14px;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        #downloadLink {
+            display: inline-block;
             margin-top: 20px;
-            padding: 12px;
-            background: #000;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            min-height: 40px;
-            text-align: center;
-            border: 1px solid #10b981;
+            color: #22d3ee;
+            text-decoration: none;
+            font-weight: bold;
+            border-bottom: 2px solid #22d3ee;
+            padding-bottom: 2px;
         }
-
-        .terminal-error { color: #ef4444; border-color: #ef4444; }
-        .terminal-info { color: var(--accent-cyan); border-color: var(--accent-cyan); }
-        .terminal-success { color: var(--success); border-color: var(--success); }
-        
-        canvas { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="header-title">JARVIS QUANTUM CORE</div>
-    <div class="header-sub">Maximum Capacity Media Engine</div>
+    <div class="container">
+        <h1>AliRaza Converter</h1>
+        <div class="subtitle">Offline Native Video-to-Audio Matrix</div>
 
-    <div class="engine-container">
-        <label class="upload-zone" id="drop-zone" for="file-input">
-            <p>Tap to Initialize Target Asset Streams (Max 200)</p>
-        </label>
-        <input type="file" id="file-input" multiple>
-
-        <div class="file-info" id="file-info">
-            <strong>Active Asset Count:</strong> <span id="asset-count">0 File(s)</span><br>
-            <strong>Total Queue Mass:</strong> <span id="file-size">0 KB</span>
-            <div id="file-list-preview" style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);"></div>
+        <div class="file-box" onclick="document.getElementById('videoInput').click()">
+            <span id="fileNameDisplay">Tap here to choose a video file</span>
+            <input type="file" id="videoInput" accept="video/*">
         </div>
 
-        <div class="selector-group">
-            <label>Select Target Batch Translation Protocol</label>
-            <select id="format-selector">
-                <optgroup label="Images (Canvas API Binary Matrix)">
-                    <option value="png" selected>PNG (Lossless Matrix Image)</option>
-                    <option value="jpg">JPG (Compressed Matrix Image)</option>
-                    <option value="webp">WEBP (Modern Web Image)</option>
-                </optgroup>
-                <optgroup label="Document Compiler (All files into ONE)">
-                    <option value="pdf">PDF (Unified Master Document)</option>
-                </optgroup>
-                <optgroup label="Media (FFmpeg WebAssembly Core)">
-                    <option value="mp3">MP3 (True Audio Layer Rewrite)</option>
-                    <option value="m4a">M4A (AAC Audio Container)</option>
-                    <option value="wav">WAV (Uncompressed Audio PCM)</option>
-                    <option value="mp4">MP4 (True H.264 Video Encode)</option>
-                    <option value="mkv">MKV (Matroska Media Container)</option>
-                </optgroup>
-            </select>
-        </div>
+        <button id="convertBtn" class="btn btn-convert" disabled>Convert to Audio (WAV)</button>
 
-        <div class="progress-container" id="progress-panel">
-            <div class="progress-labels">
-                <span id="progress-status">Processing queue...</span>
-                <span id="progress-percentage">0%</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="progress-bar-fill"></div>
-            </div>
-        </div>
-
-        <button class="btn-execute" onclick="executeBatchConversion()">Compile & Execute Batch</button>
-
-        <div class="terminal-log terminal-info" id="terminal">System Standing By, sir.</div>
+        <div id="statusDisplay" class="status">Status: Waiting for file selection...</div>
+        
+        <a id="downloadLink" style="display: none;">Download Extracted Audio</a>
     </div>
 
-    <canvas id="render-canvas"></canvas>
-
     <script>
-        let assetBatchQueue = [];
-        const terminal = document.getElementById('terminal');
-        const progressPanel = document.getElementById('progress-panel');
-        const progressBarFill = document.getElementById('progress-bar-fill');
-        const progressPercentage = document.getElementById('progress-percentage');
-        const progressStatus = document.getElementById('progress-status');
+        let selectedFile = null;
 
-        if (window['pdfjs-dist/build/pdf']) {
-            window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc = '';
-        }
-
-        function logToTerminal(message, type = "info") {
-            terminal.innerText = message;
-            terminal.className = `terminal-log terminal-${type}`;
-        }
-
-        function updateProgressBar(percentage, statusText) {
-            progressPanel.style.display = "block";
-            progressBarFill.style.width = `${percentage}%`;
-            progressPercentage.innerText = `${Math.round(percentage)}%`;
-            if (statusText) progressStatus.innerText = statusText;
-        }
-
-        document.getElementById('file-input').addEventListener('change', function(e) {
-            if (e.target.files && e.target.files.length > 0) {
-                assetBatchQueue = Array.from(e.target.files).slice(0, 200);
-                
-                let totalSize = 0;
-                let listHtml = "";
-                assetBatchQueue.forEach(f => {
-                    totalSize += f.size;
-                    listHtml += `• ${f.name}<br>`;
-                });
-
-                document.getElementById('asset-count').innerText = `${assetBatchQueue.length} File(s) loaded`;
-                document.getElementById('file-size').innerText = (totalSize / 1024).toFixed(2) + " KB";
-                document.getElementById('file-list-preview').innerHTML = listHtml;
-                document.getElementById('file-info').style.display = "block";
-                
-                progressPanel.style.display = "none";
-                progressBarFill.style.width = "0%";
-                
-                logToTerminal(`${assetBatchQueue.length} assets verified in processing ledger, sir.`, "success");
-            } else {
-                logToTerminal(`No input detected in file dialog, sir.`, "error");
+        // Listen for user picking a media file
+        document.getElementById('videoInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                document.getElementById('fileNameDisplay').innerText = selectedFile.name;
+                document.getElementById('convertBtn').disabled = false;
+                document.getElementById('statusDisplay').innerText = "Status: File ready for processing.";
             }
         });
 
-        async function executeBatchConversion() {
-            if (assetBatchQueue.length === 0) return logToTerminal("Error: Processing queue buffer is empty, sir.", "error");
-            
-            const targetFormat = document.getElementById('format-selector').value;
-            const totalFiles = assetBatchQueue.length;
-            
-            if (targetFormat === 'pdf') {
-                await processImagesToSinglePdfLocally(assetBatchQueue);
-                return;
-            }
+        // Local processing calculation architecture
+        document.getElementById('convertBtn').addEventListener('click', async function() {
+            if (!selectedFile) return;
 
-            logToTerminal(`Initializing batch array loop execution for ${totalFiles} assets...`, "info");
-            updateProgressBar(0, `Starting batch execution...`);
+            const status = document.getElementById('statusDisplay');
+            const downloadLink = document.getElementById('downloadLink');
+            const convertBtn = this;
 
-            for (let i = 0; i < totalFiles; i++) {
-                const currentAsset = assetBatchQueue[i];
-                const originalName = currentAsset.name.split('.')[0];
-                const fileType = currentAsset.type || currentAsset.name.toLowerCase();
-                const baseProgress = (i / totalFiles) * 100;
-                
-                updateProgressBar(baseProgress, `Processing [${i+1}/${totalFiles}]: ${currentAsset.name}`);
-                logToTerminal(`Compiling file data cell ${i+1} of ${totalFiles}: ${currentAsset.name}`, "info");
+            try {
+                convertBtn.disabled = true;
+                status.innerText = "Processing: Reading local file array storage...";
+                downloadLink.style.display = "none";
 
-                try {
-                    if ((fileType.includes('pdf') || currentAsset.name.toLowerCase().endsWith('.pdf')) && ['png', 'jpg', 'webp'].includes(targetFormat)) {
-                        await processPdfToImageLocally(currentAsset, targetFormat, originalName);
-                    }
-                    else if (['png', 'jpg', 'webp'].includes(targetFormat)) {
-                        await processImageLocally(currentAsset, targetFormat, originalName);
-                    } 
-                    else if (['mp3', 'm4a', 'wav', 'mp4', 'mkv'].includes(targetFormat)) {
-                        await processMediaLocally(currentAsset, targetFormat, originalName, (innerPct) => {
-                            const combinedProgress = baseProgress + (innerPct / totalFiles);
-                            updateProgressBar(combinedProgress, `Encoding media stack: ${Math.round(innerPct)}%`);
-                        });
-                    }
-                } catch (error) {
-                    console.error(error);
-                    logToTerminal(`Exception caught on loop node ${currentAsset.name}. Advancing queue...`, "error");
-                }
-                
-                updateProgressBar(((i + 1) / totalFiles) * 100);
-            }
-
-            updateProgressBar(100, "Batch complete!");
-            logToTerminal(`All ${totalFiles} target operations fully processed, sir!`, "success");
-        }
-
-        function getImageAsPngArrayBuffer(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        canvas.toBlob(blob => {
-                            if(!blob) return reject();
-                            blob.arrayBuffer().then(resolve).catch(reject);
-                        }, 'image/png');
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function processImagesToSinglePdfLocally(files) {
-            logToTerminal("Initializing Unified Master Document Matrix...", "info");
-            const pdfDoc = await PDFLib.PDFDocument.create();
-            let validPages = 0;
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                updateProgressBar((i / files.length) * 100, `Mounting Page ${i + 1} of ${files.length}...`);
-                
-                try {
-                    const pngBuffer = await getImageAsPngArrayBuffer(file);
-                    const imageEmbed = await pdfDoc.embedPng(pngBuffer);
-
-                    const page = pdfDoc.addPage([600, 800]);
-                    const ratio = Math.min(500 / imageEmbed.width, 700 / imageEmbed.height);
-                    const w = imageEmbed.width * ratio;
-                    const h = imageEmbed.height * ratio;
-                    
-                    page.drawImage(imageEmbed, { 
-                        x: (600 - w) / 2, 
-                        y: (800 - h) / 2, 
-                        width: w, 
-                        height: h 
-                    });
-                    validPages++;
-                } catch (err) {
-                    logToTerminal(`Skipping ${file.name}: Incompatible layer matrix.`, "error");
-                }
-            }
-
-            if (validPages === 0) return logToTerminal("No valid image data to compile, sir.", "error");
-
-            updateProgressBar(100, "Compiling Final PDF...");
-            const pdfBytes = await pdfDoc.save();
-            triggerDownload(new Blob([pdfBytes], { type: 'application/pdf' }), `JARVIS_Master_Document.pdf`);
-            logToTerminal(`Flawless Master PDF containing ${validPages} pages generated, sir!`, "success");
-        }
-
-        function processImageLocally(file, format, baseName) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.getElementById('render-canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0);
+                // Read file streams natively on hardware RAM sticks
+                const fileReader = new FileReader();
+                fileReader.onload = async function(event) {
+                    try {
+                        status.innerText = "Processing: Decoding local audio frequencies...";
+                        const arrayBuffer = event.target.result;
                         
-                        let mime = 'image/png';
-                        if (format === 'jpg') mime = 'image/jpeg';
-                        if (format === 'webp') mime = 'image/webp';
-
-                        canvas.toBlob((blob) => {
-                            if (!blob) return reject("Blob failure");
-                            triggerDownload(blob, `${baseName}.${format}`);
-                            resolve();
-                        }, mime, 0.95);
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function processPdfToImageLocally(file, targetFormat, originalName) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    window['pdfjs-dist/build/pdf'].getDocument({
-                        data: new Uint8Array(e.target.result)
-                    }).promise.then(function(pdf) {
-                        pdf.getPage(1).then(function(page) {
-                            const canvas = document.getElementById('render-canvas');
-                            const ctx = canvas.getContext('2d');
-                            const viewport = page.getViewport({ scale: 2.0 });
-                            canvas.width = viewport.width;
-                            canvas.height = viewport.height;
+                        // Initialize local audio pipeline architecture
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        const audioCtx = new AudioContext();
+                        
+                        audioCtx.decodeAudioData(arrayBuffer, function(audioBuffer) {
+                            status.innerText = "Processing: Compiling offline WAV container architecture...";
                             
-                            const renderContext = { canvasContext: ctx, viewport: viewport };
-                            page.render(renderContext).promise.then(function() {
-                                let mime = 'image/png';
-                                if (targetFormat === 'jpg') mime = 'image/jpeg';
-                                if (targetFormat === 'webp') mime = 'image/webp';
-
-                                canvas.toBlob((blob) => {
-                                    if (!blob) return reject();
-                                    triggerDownload(blob, `${originalName}_page1.${targetFormat}`);
-                                    resolve();
-                                }, mime, 0.95);
-                            });
+                            // Convert the raw memory bits into an offline WAV asset
+                            const wavBlob = audioBufferToWav(audioBuffer);
+                            const blobUrl = URL.createObjectURL(wavBlob);
+                            
+                            // Present download payload
+                            downloadLink.href = blobUrl;
+                            downloadLink.download = selectedFile.name.split('.')[0] + ".wav";
+                            downloadLink.style.display = "inline-block";
+                            
+                            status.innerText = "Success: Audio extracted completely offline!";
+                            convertBtn.disabled = false;
+                        }, function(err) {
+                            status.innerText = "Error: System failed to decode media format.";
+                            convertBtn.disabled = false;
                         });
-                    }).catch(reject);
+                    } catch (e) {
+                        status.innerText = "Error during compilation: " + e.message;
+                        convertBtn.disabled = false;
+                    }
                 };
-                reader.readAsArrayBuffer(file);
-            });
-        }
+                
+                fileReader.readAsArrayBuffer(selectedFile);
 
-        async function processMediaLocally(file, targetFormat, originalName, progressCallback) {
-            const { createFFmpeg, fetchFile } = FFmpeg;
-            const ffmpeg = createFFmpeg({ log: false, corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
-            
-            await ffmpeg.load();
-            
-            ffmpeg.setProgress(({ ratio }) => {
-                if (ratio >= 0 && ratio <= 1) {
-                    progressCallback(ratio * 100);
-                }
-            });
-
-            const inName = 'input.' + file.name.split('.').pop();
-            const outName = `output.${targetFormat}`;
-            const fileType = file.type || file.name.toLowerCase();
-            
-            ffmpeg.FS('writeFile', inName, await fetchFile(file));
-            
-            const isAudioInput = fileType.includes('audio') || ['mp3', 'wav', 'm4a', 'ogg'].some(ext => file.name.toLowerCase().endsWith(ext));
-            const isAudioOutput = ['mp3', 'wav', 'm4a'].includes(targetFormat);
-            const isVideoOutput = ['mp4', 'mkv'].includes(targetFormat);
-            if (isAudioInput && isVideoOutput) {
-                await ffmpeg.run('-f', 'lavfi', '-i', 'color=c=black:s=640x480:r=30', '-i', inName, '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac', '-b:a', '128k', '-pix_fmt', 'yuv420p', '-shortest', outName);
-            } else if (isAudioOutput) {
-                await ffmpeg.run('-i', inName, '-vn', outName);
-            } else {
-                await ffmpeg.run('-i', inName, outName);
+            } catch (err) {
+                status.innerText = "Error: " + err.message;
+                convertBtn.disabled = false;
             }
-            
-            const data = ffmpeg.FS('readFile', outName);
-            
-            let mime = 'video/mp4';
-            if (targetFormat === 'mp3') mime = 'audio/mpeg';
-            if (targetFormat === 'm4a') mime = 'audio/mp4';
-            if (targetFormat === 'wav') mime = 'audio/wav';
-            if (targetFormat === 'mkv') mime = 'video/x-matroska';
+        });
 
-            triggerDownload(new Blob([data.buffer], { type: mime }), `${originalName}.${targetFormat}`);
-            
-            ffmpeg.FS('unlink', inName);
-            ffmpeg.FS('unlink', outName);
+        // Standard sub-matrix script to output raw PCM channel configurations to standalone WAV structure
+        function audioBufferToWav(buffer) {
+            let numOfChan = buffer.numberOfChannels,
+                length = buffer.length * numOfChan * 2 + 44,
+                bufferArr = new ArrayBuffer(length),
+                view = new DataView(bufferArr),
+                channels = [], i, sample,
+                offset = 0,
+                pos = 0;
+
+            function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8); // file length - 8
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt " chunk
+            setUint32(16);         // chunk length
+            setUint16(1);          // sample format (raw PCM)
+            setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan); // byte rate
+            setUint16(numOfChan * 2);                     // block align
+            setUint16(16);                                // bits per sample
+
+            setUint32(0x61746164); // "data" chunk
+            setUint32(length - pos - 4);
+
+            for (i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while (pos < length) {
+                for (i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([bufferArr], { type: 'audio/wav' });
         }
 
-        // QUANTUM NATIVE SYSTEM BRIDGE
-        function triggerDownload(blob, filename) {
-            const reader = new FileReader();
-            reader.onloadend = function() {
-                const base64Data = reader.result; // This converts the file to a safe Base64 String
-
-                // Check if the file is running inside your Android App Interface Wrapper
-                if (window.AndroidBridge && window.AndroidBridge.downloadFileFromWeb) {
-                    // Send the raw data and filename straight into the Android OS native handler
-                    window.AndroidBridge.downloadFileFromWeb(base64Data, filename);
-                    logToTerminal("Asset piped to Android Native System Bridge, sir.", "success");
-                } else {
-                    // Standard mobile browser fallback channel
-                    const downloadUrl = base64Data.replace(/^data:[^;]+;/, 'data:application/octet-stream;');
-                    const a = document.createElement('a');
-                    a.href = downloadUrl;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }
-            };
-            reader.readAsDataURL(blob);
+        // Register the background Service Worker pipeline matrix for full offline performance execution
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA Service Worker registered successfully.'))
+                    .catch(err => console.log('PWA Service Worker registration failed.', err));
+            });
         }
     </script>
 </body>
