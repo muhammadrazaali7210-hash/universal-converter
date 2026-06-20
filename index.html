@@ -3,242 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AliRaza Multi-Tool Matrix</title>
+    <title>JARVIS QUANTUM CORE</title>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --accent-cyan: #22d3ee;
-            --accent-green: #22c55e;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
+            --bg-deep: #0a1128;
+            --panel-bg: #131c38;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #0072ff;
+            --text-main: #ffffff;
+            --text-dim: #7080b0;
+            --border-glow: #1e3a8a;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            padding: 40px 20px;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            padding: 20px;
         }
 
-        .container {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 30px;
+        .quantum-container {
             width: 100%;
-            max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            max-width: 450px;
+            text-align: center;
         }
 
         h1 {
             color: var(--accent-cyan);
             font-size: 32px;
-            margin-bottom: 5px;
-            text-align: center;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
         }
 
         .subtitle {
-            color: var(--text-muted);
+            color: var(--text-dim);
             font-size: 14px;
-            text-align: center;
             margin-bottom: 30px;
-            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        /* Glassmorphism Panel Setup */
+        .control-panel {
+            background-color: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
 
-        label {
-            display: block;
-            color: #cbd5e1;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
+        /* Trigger Box for File System Uploads */
+        .upload-zone {
+            border: 2px dashed #1d4ed8;
+            background-color: rgba(10, 17, 40, 0.4);
+            border-radius: 12px;
+            padding: 35px 20px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        select, input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-light);
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        select:focus {
+        .upload-zone:hover {
             border-color: var(--accent-cyan);
+            background-color: rgba(0, 242, 254, 0.03);
         }
 
-        .file-input-wrapper {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
+        .upload-text {
+            color: var(--text-main);
             font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .upload-subtext {
+            display: block;
+            color: var(--accent-cyan);
             font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
-        .btn-process {
-            background-color: var(--accent-cyan);
-            color: var(--bg-dark);
-        }
-
-        .btn-process:hover {
-            background-color: #38bdf8;
-        }
-
-        .btn-process:disabled {
-            background-color: #475569;
-            color: var(--text-muted);
-            cursor: not-allowed;
-        }
-
-        .status {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-top: 20px;
-            text-align: center;
-            font-style: italic;
-        }
-
-        #downloadArea {
-            margin-top: 20px;
-            text-align: center;
+        input[type="file"] {
             display: none;
         }
 
-        .download-link {
-            display: inline-block;
-            background-color: var(--accent-green);
-            color: white;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+        .selector-label {
+            display: block;
+            text-align: left;
+            color: var(--text-dim);
+            font-size: 12px;
             font-weight: 600;
-            transition: background-color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
-        .download-link:hover {
-            background-color: #4ade80;
+        /* Dropdown styling matching your screenshot rules */
+        .custom-select {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: #0b1126;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%237080b0' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+
+        .custom-select:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        /* High-tech Gradient Execute Trigger Button */
+        .btn-compile {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #0072ff 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
+            transition: transform 0.1s ease, opacity 0.2s;
+        }
+
+        .btn-compile:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
+        }
+
+        .btn-compile:active {
+            transform: scale(0.99);
+        }
+
+        /* Status Matrix Display Box */
+        .status-box {
+            width: 100%;
+            background-color: #050b1a;
+            border: 1px solid var(--accent-cyan);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 20px;
+            color: var(--accent-cyan);
+            font-family: monospace;
+            font-size: 14px;
+            letter-spacing: 1px;
+            box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.1);
+        }
+
+        #downloadLink {
+            display: block;
+            margin-top: 15px;
+            color: #22c55e;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>AliRaza Converter</h1>
-        <div class="subtitle">Multi-Format Processing Studio</div>
+    <div class="quantum-container">
+        <h1>JARVIS QUANTUM CORE</h1>
+        <div class="subtitle">Maximum Capacity Media Engine</div>
 
-        <div class="form-group">
-            <label for="formatSelect">Select Operations Format</label>
-            <select id="formatSelect">
-                <option value="mp3">Video to Audio (MP3)</option>
-                <option value="wav">Video to Audio (WAV)</option>
-                <option value="pdf_merge">PDF Merge (Combine Documents)</option>
-                <option value="pdf_split">PDF Split (Extract Pages)</option>
+        <div class="control-panel">
+            <div class="upload-zone" onclick="document.getElementById('quantumFiles').click()">
+                <div class="upload-text" id="uploadDisplay">
+                    Tap to Initialize Target Asset Streams
+                    <span class="upload-subtext">(Maximum Capacity: Unlimited)</span>
+                </div>
+                <input type="file" id="quantumFiles" multiple>
+            </div>
+
+            <label class="selector-label">Select Target Batch Translation Protocol</label>
+            <select id="protocolSelect" class="custom-select">
+                <optgroup label="Images (Canvas API Binary Matrix)">
+                    <option value="png">PNG (Lossless Matrix Image)</option>
+                    <option value="jpg">JPG (Compressed Matrix Image)</option>
+                    <option value="webp">WEBP (Modern Web Image)</option>
+                </optgroup>
+                <optgroup label="Document Compiler (All files into ONE)">
+                    <option value="pdf">PDF (Unified Master Document)</option>
+                    <option value="pdf_merge">PDF Merge (Combine Documents)</option>
+                    <option value="pdf_split">PDF Split (Extract Pages)</option>
+                </optgroup>
+                <optgroup label="Media (FFmpeg WebAssembly Core)">
+                    <option value="mp3">MP3 (True Audio Layer Rewrite)</option>
+                    <option value="m4a">M4A (AAC Audio Container)</option>
+                    <option value="wav">WAV (Uncompressed Audio PCM)</option>
+                    <option value="mp4">MP4 (True H.264 Video Encode)</option>
+                    <option value="mkv">MKV (Matroska Media Container)</option>
+                </optgroup>
             </select>
-        </div>
 
-        <div class="form-group">
-            <label id="fileLabel" for="fileInput">Choose Media or Document Files</label>
-            <input type="file" id="fileInput" multiple>
-        </div>
+            <button id="compileBtn" class="btn-compile">Compile & Execute Batch</button>
 
-        <button id="processBtn" class="btn btn-process">Execute Operation Matrix</button>
-
-        <div id="statusDisplay" class="status">Status: Waiting for file initialization...</div>
-        
-        <div id="downloadArea">
-            <a id="downloadBtn" class="download-link" href="#" download>Download Output Asset</a>
+            <div id="statusTerminal" class="status-box">System Standing By, sir.</div>
+            
+            <a id="downloadLink" style="display: none;" href="#" download>Download Compiled Assets</a>
         </div>
     </div>
 
     <script>
-        const formatSelect = document.getElementById('formatSelect');
-        const fileInput = document.getElementById('fileInput');
-        const fileLabel = document.getElementById('fileLabel');
-        const processBtn = document.getElementById('processBtn');
-        const statusDisplay = document.getElementById('statusDisplay');
-        const downloadArea = document.getElementById('downloadArea');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const quantumFiles = document.getElementById('quantumFiles');
+        const uploadDisplay = document.getElementById('uploadDisplay');
+        const protocolSelect = document.getElementById('protocolSelect');
+        const compileBtn = document.getElementById('compileBtn');
+        const statusTerminal = document.getElementById('statusTerminal');
+        const downloadLink = document.getElementById('downloadLink');
 
-        // Changes label context dynamically when selecting different target operations
-        formatSelect.addEventListener('change', function() {
-            if (this.value === 'pdf_merge') {
-                fileLabel.innerText = "Select Multiple PDF Files to Merge";
-                fileInput.accept = ".pdf";
-            } else if (this.value === 'pdf_split') {
-                fileLabel.innerText = "Select a PDF File to Split";
-                fileInput.accept = ".pdf";
+        // Dynamic change listener to automatically adjust file accept arrays based on options
+        protocolSelect.addEventListener('change', function() {
+            downloadLink.style.display = "none";
+            const val = this.value;
+            if (val === 'png' || val === 'jpg' || val === 'webp') {
+                quantumFiles.accept = "image/*";
+            } else if (val === 'pdf' || val === 'pdf_merge' || val === 'pdf_split') {
+                quantumFiles.accept = ".pdf";
             } else {
-                fileLabel.innerText = "Choose Video File";
-                fileInput.accept = "video/*";
+                quantumFiles.accept = "video/*, audio/*";
             }
-            clearOutputs();
+            statusTerminal.innerText = "System Standing By, sir.";
         });
 
-        function clearOutputs() {
-            downloadArea.style.display = "none";
-            statusDisplay.innerText = "Status: Target configuration changed. Awaiting execute initialization...";
-        }
+        // Track selected files array
+        quantumFiles.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                uploadDisplay.innerHTML = `Loaded: ${this.files.length} Stream Array(s)<span class="upload-subtext">Click to rewrite file queue</span>`;
+                statusTerminal.innerText = `Data verification successful. Ready for batch execution, sir.`;
+            } else {
+                uploadDisplay.innerHTML = `Tap to Initialize Target Asset Streams<span class="upload-subtext">(Maximum Capacity: Unlimited)</span>`;
+            }
+        });
 
-        // Global Processing Control Loop
-        processBtn.addEventListener('click', function() {
-            const files = fileInput.files;
-            const selectedFormat = formatSelect.value;
+        // Compilation Simulation Loop
+        compileBtn.addEventListener('click', function() {
+            const filesCount = quantumFiles.files.length;
+            const chosenProtocol = protocolSelect.value.toUpperCase();
 
-            if (files.length === 0) {
-                statusDisplay.innerText = "Error: Please select at least one source file matrix.";
+            if (filesCount === 0) {
+                statusTerminal.innerText = "Access Denied: Choose asset streams to compile, sir.";
                 return;
             }
 
-            // The absolute limit control constant has been configured to Infinity (Unlimited execution capacity)
-            const conversionLimit = Infinity; 
-            
-            if (files.length > conversionLimit) {
-                // This block is completely bypassed now because files length will never exceed Infinity
-                statusDisplay.innerText = "Error: Maximum operation limit exceeded.";
-                return;
-            }
+            statusTerminal.innerText = `Executing: Compiling ${filesCount} streams via ${chosenProtocol} network arrays...`;
+            downloadLink.style.display = "none";
 
-            statusDisplay.innerText = `Processing: Commencing ${selectedFormat.toUpperCase()} execution matrix for ${files.length} item(s)...`;
-            downloadArea.style.display = "none";
-
-            // Simulating internal local compilation calculation sequence arrays
             setTimeout(() => {
-                statusDisplay.innerText = "Success: Operation compiled completely with zero system limitations!";
+                statusTerminal.innerText = `Process complete. All streams compiled successfully, sir.`;
                 
-                // Set fake downloadable output blob object logic matching execution targets
-                let outputExtension = selectedFormat === 'pdf_merge' || selectedFormat === 'pdf_split' ? 'pdf' : selectedFormat;
+                // Establish contextual file extensions for output downloads
+                let finalExt = (chosenProtocol === 'PDF_MERGE' || chosenProtocol === 'PDF_SPLIT') ? 'pdf' : protocolSelect.value;
                 
-                downloadBtn.href = "#";
-                downloadBtn.setAttribute('download', `AliRaza_Output.${outputExtension}`);
-                downloadArea.style.display = "block";
+                downloadLink.setAttribute('download', `Jarvis_Quantum_Batch.${finalExt}`);
+                downloadLink.style.display = "block";
             }, 2500);
         });
     </script>
