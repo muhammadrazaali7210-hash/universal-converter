@@ -202,6 +202,7 @@
                     <option value="png">PNG (Lossless Matrix Image)</option>
                     <option value="jpg">JPG (Compressed Matrix Image)</option>
                     <option value="webp">WEBP (Modern Web Image)</option>
+                    <option value="svg">SVG (Scalable Vector Code Matrix)</option>
                 </optgroup>
                 <optgroup label="Document Compiler (All files into ONE)">
                     <option value="pdf">PDF (Unified Master Document)</option>
@@ -237,8 +238,10 @@
         protocolSelect.addEventListener('change', function() {
             downloadLink.style.display = "none";
             const val = this.value;
-            if (val === 'png' || val === 'jpg' || val === 'webp') {
-                quantumFiles.accept = "image/*";
+            
+            // Evaluates configuration patterns for standard graphics and vector profiles
+            if (val === 'png' || val === 'jpg' || val === 'webp' || val === 'svg') {
+                quantumFiles.accept = "image/*, .svg, image/svg+xml";
             } else if (val === 'pdf' || val === 'pdf_merge' || val === 'pdf_split') {
                 quantumFiles.accept = ".pdf";
             } else {
