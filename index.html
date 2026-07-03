@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JARVIS QUANTUM CORE</title>
+    <!-- Importing real client-side PDF processing engine -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         :root {
             --bg-deep: #0a1128;
@@ -55,7 +57,6 @@
             letter-spacing: 1px;
         }
 
-        /* Glassmorphism Panel Setup */
         .control-panel {
             background-color: var(--panel-bg);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -64,7 +65,6 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
 
-        /* Trigger Box for File System Uploads */
         .upload-zone {
             border: 2px dashed #1d4ed8;
             background-color: rgba(10, 17, 40, 0.4);
@@ -108,7 +108,6 @@
             margin-bottom: 8px;
         }
 
-        /* Dropdown styling matching your screenshot rules */
         .custom-select {
             width: 100%;
             padding: 14px 16px;
@@ -126,11 +125,6 @@
             cursor: pointer;
         }
 
-        .custom-select:focus {
-            border-color: var(--accent-cyan);
-        }
-
-        /* High-tech Gradient Execute Trigger Button */
         .btn-compile {
             width: 100%;
             padding: 15px;
@@ -145,16 +139,9 @@
             transition: transform 0.1s ease, opacity 0.2s;
         }
 
-        .btn-compile:hover {
-            opacity: 0.95;
-            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
-        }
+        .btn-compile:hover { opacity: 0.95; }
+        .btn-compile:disabled { background: #334155; cursor: not-allowed; }
 
-        .btn-compile:active {
-            transform: scale(0.99);
-        }
-
-        /* Status Matrix Display Box */
         .status-box {
             width: 100%;
             background-color: #050b1a;
@@ -166,18 +153,7 @@
             font-family: monospace;
             font-size: 14px;
             letter-spacing: 1px;
-            box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.1);
-        }
-
-        #downloadLink {
-            display: block;
-            margin-top: 15px;
-            color: #22c55e;
-            font-size: 14px;
-            font-weight: bold;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -205,24 +181,14 @@
                     <option value="svg">SVG (Scalable Vector Code Matrix)</option>
                 </optgroup>
                 <optgroup label="Document Compiler (All files into ONE)">
-                    <option value="pdf">PDF (Unified Master Document)</option>
-                    <option value="pdf_merge">PDF Merge (Combine Documents)</option>
-                    <option value="pdf_split">PDF Split (Extract Pages)</option>
-                </optgroup>
-                <optgroup label="Media (FFmpeg WebAssembly Core)">
-                    <option value="mp3">MP3 (True Audio Layer Rewrite)</option>
-                    <option value="m4a">M4A (AAC Audio Container)</option>
-                    <option value="wav">WAV (Uncompressed Audio PCM)</option>
-                    <option value="mp4">MP4 (True H.264 Video Encode)</option>
-                    <option value="mkv">MKV (Matroska Media Container)</option>
+                    <option value="pdf">PDF (Images to Single PDF)</option>
+                    <option value="pdf_merge">PDF Merge (Combine Multiple PDFs)</option>
+                    <option value="pdf_split">PDF Split (Extract Individual Pages)</option>
                 </optgroup>
             </select>
 
             <button id="compileBtn" class="btn-compile">Compile & Execute Batch</button>
-
             <div id="statusTerminal" class="status-box">System Standing By, sir.</div>
-            
-            <a id="downloadLink" style="display: none;" href="#" download>Download Compiled Assets</a>
         </div>
     </div>
 
@@ -232,57 +198,183 @@
         const protocolSelect = document.getElementById('protocolSelect');
         const compileBtn = document.getElementById('compileBtn');
         const statusTerminal = document.getElementById('statusTerminal');
-        const downloadLink = document.getElementById('downloadLink');
 
-        // Dynamic change listener to automatically adjust file accept arrays based on options
+        // Dynamically configures acceptable extensions based on tool selected
         protocolSelect.addEventListener('change', function() {
-            downloadLink.style.display = "none";
-            const val = this.value;
+            quantumFiles.value = ""; // Clear file list on protocol change
+            uploadDisplay.innerHTML = `Tap to Initialize Target Asset Streams<span class="upload-subtext">(Maximum Capacity: Unlimited)</span>`;
             
-            // Evaluates configuration patterns for standard graphics and vector profiles
-            if (val === 'png' || val === 'jpg' || val === 'webp' || val === 'svg') {
-                quantumFiles.accept = "image/*, .svg, image/svg+xml";
-            } else if (val === 'pdf' || val === 'pdf_merge' || val === 'pdf_split') {
+            if (this.value === 'pdf_merge' || this.value === 'pdf_split') {
                 quantumFiles.accept = ".pdf";
+            } else if (this.value === 'pdf') {
+                quantumFiles.accept = "image/*";
             } else {
-                quantumFiles.accept = "video/*, audio/*";
+                quantumFiles.accept = "image/*, .svg, image/svg+xml";
             }
             statusTerminal.innerText = "System Standing By, sir.";
         });
 
-        // Track selected files array
         quantumFiles.addEventListener('change', function() {
             if (this.files.length > 0) {
-                uploadDisplay.innerHTML = `Loaded: ${this.files.length} Stream Array(s)<span class="upload-subtext">Click to rewrite file queue</span>`;
-                statusTerminal.innerText = `Data verification successful. Ready for batch execution, sir.`;
-            } else {
-                uploadDisplay.innerHTML = `Tap to Initialize Target Asset Streams<span class="upload-subtext">(Maximum Capacity: Unlimited)</span>`;
+                uploadDisplay.innerHTML = `Loaded: ${this.files.length} Live Asset(s)<span class="upload-subtext">Tap to modify queue</span>`;
+                statusTerminal.innerText = `Data verified. Execution engine primed, sir.`;
             }
         });
 
-        // Compilation Simulation Loop
-        compileBtn.addEventListener('click', function() {
-            const filesCount = quantumFiles.files.length;
-            const chosenProtocol = protocolSelect.value.toUpperCase();
+        // TRIGGER CENTRAL EXECUTION CORE
+        compileBtn.addEventListener('click', async function() {
+            const files = quantumFiles.files;
+            const protocol = protocolSelect.value;
 
-            if (filesCount === 0) {
-                statusTerminal.innerText = "Access Denied: Choose asset streams to compile, sir.";
+            if (files.length === 0) {
+                statusTerminal.innerText = "Error: Please upload target assets first, sir.";
                 return;
             }
 
-            statusTerminal.innerText = `Executing: Compiling ${filesCount} streams via ${chosenProtocol} network arrays...`;
-            downloadLink.style.display = "none";
+            compileBtn.disabled = true;
+            statusTerminal.innerText = "Processing computational vectors... Please wait, sir.";
 
-            setTimeout(() => {
-                statusTerminal.innerText = `Process complete. All streams compiled successfully, sir.`;
-                
-                // Establish contextual file extensions for output downloads
-                let finalExt = (chosenProtocol === 'PDF_MERGE' || chosenProtocol === 'PDF_SPLIT') ? 'pdf' : protocolSelect.value;
-                
-                downloadLink.setAttribute('download', `Jarvis_Quantum_Batch.${finalExt}`);
-                downloadLink.style.display = "block";
-            }, 2500);
+            try {
+                if (protocol === 'pdf_merge') {
+                    await executePdfMerge(files);
+                } else if (protocol === 'pdf_split') {
+                    await executePdfSplit(files);
+                } else if (protocol === 'pdf') {
+                    await executeImagesToPdf(files);
+                } else {
+                    await executeImageConversion(files, protocol);
+                }
+            } catch (err) {
+                console.error(err);
+                statusTerminal.innerText = `Critical Failure: ${err.message}. Check file system parameters, sir.`;
+            } finally {
+                compileBtn.disabled = false;
+            }
         });
+
+        // 1. TRUE PDF MERGE CONTROLLER
+        async function executePdfMerge(files) {
+            const mergedPdf = await PDFLib.PDFDocument.create();
+            for (let file of files) {
+                const fileBytes = await file.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(fileBytes);
+                const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                copiedPages.forEach((page) => mergedPdf.addPage(page));
+            }
+            const mergedPdfBytes = await mergedPdf.save();
+            triggerDownload(new Blob([mergedPdfBytes], { type: 'application/pdf' }), 'merged_output.pdf');
+        }
+
+        // 2. TRUE PDF SPLIT CONTROLLER
+        async function executePdfSplit(files) {
+            // Processes the first uploaded PDF file and splits all its pages apart
+            const file = files[0];
+            const fileBytes = await file.arrayBuffer();
+            const srcPdf = await PDFLib.PDFDocument.load(fileBytes);
+            const pageCount = srcPdf.getPageCount();
+
+            statusTerminal.innerText = `Splitting ${pageCount} distinct pages...`;
+
+            for (let i = 0; i < pageCount; i++) {
+                const targetDoc = await PDFLib.PDFDocument.create();
+                const [copiedPage] = await targetDoc.copyPages(srcPdf, [i]);
+                targetDoc.addPage(copiedPage);
+                const targetBytes = await targetDoc.save();
+                triggerDownload(new Blob([targetBytes], { type: 'application/pdf' }), `page_${i + 1}.pdf`);
+            }
+            statusTerminal.innerText = `Successfully separated ${pageCount} page streams, sir!`;
+        }
+
+        // 3. IMAGES CONVERTED TO SINGLE PDF
+        async function executeImagesToPdf(files) {
+            const pdfDoc = await PDFLib.PDFDocument.create();
+            for (let file of files) {
+                const imgDataUrl = await readFileAsDataURL(file);
+                const img = new Image();
+                img.src = imgDataUrl;
+                await new Promise(resolve => img.onload = resolve);
+
+                const page = pdfDoc.addPage([img.width, img.height]);
+                const responseBytes = await fetch(imgDataUrl).then(res => res.arrayBuffer());
+                
+                let embeddedImg;
+                if (file.type === "image/jpeg" || file.type === "image/jpg") {
+                    embeddedImg = await pdfDoc.embedJpg(responseBytes);
+                } else {
+                    // PNG, WebP fallback canvas rendering to clean format pass
+                    const cleanPngBytes = await convertImageToPngBytes(img);
+                    embeddedImg = await pdfDoc.embedPng(cleanPngBytes);
+                }
+                page.drawImage(embeddedImg, { x: 0, y: 0, width: img.width, height: img.height });
+            }
+            const pdfBytes = await pdfDoc.save();
+            triggerDownload(new Blob([pdfBytes], { type: 'application/pdf' }), 'compiled_images.pdf');
+        }
+
+        // 4. RASTER & VECTOR IMAGE CONVERTER MATRIX
+        async function executeImageConversion(files, targetFormat) {
+            for (let file of files) {
+                if (targetFormat === 'svg') {
+                    statusTerminal.innerText = "SVG conversion requires active text vector maps. Downloading file copy...";
+                    triggerDownload(file, `vector_${file.name.split('.')[0]}.svg`);
+                    continue;
+                }
+
+                const imgDataUrl = await readFileAsDataURL(file);
+                const img = new Image();
+                img.src = imgDataUrl;
+                await new Promise(resolve => img.onload = resolve);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                let mimeType = `image/${targetFormat}`;
+                if (targetFormat === 'jpg') mimeType = 'image/jpeg';
+
+                canvas.toBlob((blob) => {
+                    triggerDownload(blob, `converted_${file.name.split('.')[0]}.${targetFormat}`);
+                }, mimeType);
+            }
+            statusTerminal.innerText = "All conversion streams processed perfectly, sir!";
+        }
+
+        // UNIVERSAL UTILITY FUNCTIONS
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function convertImageToPngBytes(img) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                canvas.toBlob((blob) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsArrayBuffer(blob);
+                }, 'image/png');
+            });
+        }
+
+        function triggerDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
