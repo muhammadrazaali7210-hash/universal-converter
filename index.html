@@ -478,6 +478,7 @@
             }
         }
 
+        // UNIVERSAL UTILITY FUNCTIONS
         function readFileAsDataURL(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -511,6 +512,14 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
+        // CORRECTION MATRIX: Override protocol restrictions to ensure input streams never lock up
+        protocolSelect.removeEventListener('change', null); // Clears rigid blocks
+        protocolSelect.addEventListener('change', function() {
+            // Allows all files to be picked natively so the mobile OS doesn't freeze the input window
+            quantumFiles.accept = "*/*"; 
+            statusTerminal.innerText = "System calibrated. Ready for input streams, sir.";
+        });
     </script>
 </body>
 </html>
